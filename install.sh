@@ -1,0 +1,88 @@
+#!/usr/bin/env bash
+set -e
+
+DOTFILES_DIR="$HOME/.dotfiles"
+BACKUP_DIR="$HOME/.dotfiles_backup"
+
+FILES=("zshrc" "gitconfig" "aliases" "vimrc")
+
+# -----------------------------
+# Progress bar function
+# -----------------------------
+progress_bar() {
+    local current=$1
+    local total=$2
+    local width=30
+    local filled=$(( (current * width) / total ))
+    local empty=$(( width - filled ))
+    local bar=$(printf "%0.s█" $(seq 1 $filled))
+    local spaces=$(printf "%0.s " $(seq 1 $empty))
+    printf "\r🌟 [%s%s] %d/%d" "$bar" "$spaces" "$current" "$total"
+}
+
+# -----------------------------
+# Backup & symlink
+# -----------------------------
+link_file() {
+    local src=$1
+    local dest=$2
+    if [ -e "$dest" ] || [ -L "$dest" ]; then
+        echo -e "\n📦 Backing up $dest to $BACKUP_DIR"
+        mv "$dest" "$BACKUP_DIR/"
+    fi
+    echo -e "\n🔗 Linking $src -> $dest"
+    ln -s "$src" "$dest"
+}
+
+echo "🚀 Setting up dotfiles..."
+mkdir -p "$BACKUP_DIR"
+
+total=${#FILES[@]}
+current=0
+
+for file in "${FILES[@]}"; do
+    link_file "$DOTFILES_DIR/$file" "$HOME/.$file"
+    current=$((current + 1))
+    progress_bar $current $total
+    sleep 0.3
+done
+
+# -----------------------------
+# Install Powerlevel10k theme
+# -----------------------------
+echo -e "\n🎨 Installing Powerlevel10k theme..."
+if [ ! -d "$HOME/.oh-my-zsh/custom/themes/powerlevel10k" ]; then
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git \
+        $HOME/.oh-my-zsh/custom/themes/powerlevel10k
+fi
+
+# -----------------------------
+# Install Zsh plugins
+# -----------------------------
+echo "🔌 Installing zsh plugins..."
+
+PLUGINS=(
+"https://github.com/zsh-users/zsh-autosuggestions"
+"https://github.com/zsh-users/zsh-syntax-highlighting"
+"https://github.com/zsh-users/zsh-completions"
+"https://github.com/zsh-users/zsh-history-substring-search"
+)
+
+for plugin in "${PLUGINS[@]}"; do
+    folder="$HOME/.oh-my-zsh/custom/plugins/$(basename $plugin)"
+    if [ ! -d "$folder" ]; then
+        echo "Installing $(basename $plugin)..."
+        git clone "$plugin" "$folder"
+    fi
+done
+
+# -----------------------------
+# Link Powerlevel10k config if exists
+# -----------------------------
+if [ -f "$DOTFILES_DIR/p10k.zsh" ]; then
+    link_file "$DOTFILES_DIR/p10k.zsh" "$HOME/.p10k.zsh"
+fi
+
+echo -e "\n✅ Dotfiles installed successfully!"
+echo "👉 Backups are in $BACKUP_DIR"
+echo "💡 Restart your terminal and run 'exec zsh' to see your new setup!"

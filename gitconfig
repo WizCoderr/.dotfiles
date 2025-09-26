@@ -1,0 +1,18 @@
+[user]
+    name = Wizcoderr
+    email = ssayam200@gmail.com
+
+[core]
+    editor = nvim
+    autocrlf = input
+
+[color]
+    ui = auto
+
+[alias]
+    st = status
+    cm = commit -m
+    co = checkout
+    br = branch
+    lg = log --oneline --graph --decorate --all
+
