@@ -1,22 +1,17 @@
 # -----------------------------
-# Oh-My-Zsh + Powerlevel10k
+# Zsh Configuration (Portable)
 # -----------------------------
-export ZSH="$HOME/.oh-my-zsh"
-ZSH_THEME="powerlevel10k/powerlevel10k"
 
-# Plugins
-plugins=(
-  git
-  zsh-autosuggestions
-  zsh-syntax-highlighting
-  zsh-completions
-  zsh-history-substring-search
-)
-
-source $ZSH/oh-my-zsh.sh
+# Only set ZSH if it exists
+if [ -d "$HOME/.oh-my-zsh" ]; then
+    export ZSH="$HOME/.oh-my-zsh"
+    ZSH_THEME="powerlevel10k/powerlevel10k"
+    plugins=(git zsh-autosuggestions zsh-syntax-highlighting zsh-completions zsh-history-substring-search)
+    source $ZSH/oh-my-zsh.sh
+fi
 
 # Load Powerlevel10k config if exists
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+[[ -f ~/.p10k.zsh ]] && source ~/.p10k.zsh
 
 # -----------------------------
 # SDKs / PATH
@@ -28,16 +23,22 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 export PATH=$ANDROID_HOME/platform-tools:$PATH
 
-# ASDF (Language Version Manager)
-. "$HOME/.asdf/asdf.sh"
+# -----------------------------
+# ASDF (optional)
+# -----------------------------
+if [ -f "$HOME/.asdf/asdf.sh" ]; then
+    . "$HOME/.asdf/asdf.sh"
+    . "$HOME/.asdf/completions/asdf.bash"
+fi
 
+# -----------------------------
 # Aliases
-source ~/.aliases
+# -----------------------------
+[ -f ~/.aliases ] && source ~/.aliases
 
 # Editor
 export EDITOR="nvim"
 
-# Custom prompt tweaks
+# History
 export HISTSIZE=10000
 export SAVEHIST=10000
-
