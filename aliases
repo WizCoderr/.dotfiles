@@ -2,7 +2,7 @@
 # General shortcuts
 # -----------------------------
 alias ll='ls -lah'
-alias cls='clear'
+alias clr='clear'
 alias h='history'
 alias ..='cd ..'
 alias ...='cd ../..'
@@ -20,4 +20,3 @@ alias gpl='git pull'
 # Android
 # -----------------------------
 alias adb='$ANDROID_HOME/platform-tools/adb'
-
