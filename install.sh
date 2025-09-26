@@ -29,6 +29,23 @@ if [ ! -d "$HOME/.oh-my-zsh" ]; then
 fi
 
 # -----------------------------
+# Install OpenJDK 17 if missing
+# -----------------------------
+if ! java -version &>/dev/null; then
+    echo "☕ Installing OpenJDK 17..."
+    sudo apt update
+    sudo apt install -y openjdk-17-jdk
+fi
+
+# Detect JAVA_HOME dynamically
+JAVA_PATH=$(readlink -f $(which java) | sed "s:bin/java::")
+if ! grep -q "JAVA_HOME" "$HOME/.zshrc"; then
+    echo "export JAVA_HOME=$JAVA_PATH" >> "$HOME/.zshrc"
+    echo 'export PATH=$JAVA_HOME/bin:$PATH' >> "$HOME/.zshrc"
+fi
+echo "✅ JAVA_HOME set to $JAVA_PATH"
+
+# -----------------------------
 # Backup & symlink dotfiles
 # -----------------------------
 mkdir -p "$BACKUP_DIR"
@@ -87,6 +104,6 @@ if [ -f "$DOTFILES_DIR/p10k.zsh" ]; then
     ln -sf "$DOTFILES_DIR/p10k.zsh" "$HOME/.p10k.zsh"
 fi
 
-echo -e "\n✅ Dotfiles installed successfully!"
+echo -e "\n✅ Dotfiles + Java setup installed successfully!"
 echo "👉 Backups are in $BACKUP_DIR"
-echo "💡 Restart your terminal and run 'exec zsh' to see your new setup!"
+echo "💡 Restart your terminal or run 'exec zsh' to apply changes"
