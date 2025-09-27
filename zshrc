@@ -51,3 +51,8 @@ export SAVEHIST=10000
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/
+export PATH=$JAVA_HOME/bin:$PATH
+
+# To customize prompt, run `p10k configure` or edit ~/.dotfiles/p10k.zsh.
+[[ ! -f ~/.dotfiles/p10k.zsh ]] || source ~/.dotfiles/p10k.zsh
