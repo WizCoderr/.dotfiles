@@ -8,6 +8,8 @@ alias clr='clear'
 alias h='history'
 alias ..='cd ..'
 alias ...='cd ../..'
+alias rm='rm -rf'
+alias gpu='watch -n 0.5 nvidia-smi'
 alias ex='exit'
 # -----------------------------
 # Git shortcuts
