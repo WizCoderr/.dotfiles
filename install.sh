@@ -104,6 +104,35 @@ if [ -f "$DOTFILES_DIR/p10k.zsh" ]; then
     ln -sf "$DOTFILES_DIR/p10k.zsh" "$HOME/.p10k.zsh"
 fi
 
+# -----------------------------
+# Install Ollama if missing
+# -----------------------------
+if ! command -v ollama >/dev/null 2>&1; then
+    echo -e "\n🤖 Installing Ollama..."
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL https://ollama.com/install.sh | sh
+    elif command -v wget >/dev/null 2>&1; then
+        wget -qO- https://ollama.com/install.sh | sh
+    else
+        echo "⚠️  'curl' or 'wget' not found — cannot download Ollama installer."
+        echo "   Visit https://ollama.com for manual installation instructions."
+    fi
+else
+    echo -e "\n✅ Ollama already installed"
+fi
+
+# -----------------------------
+# Ensure Ollama model is pulled
+# -----------------------------
+if command -v ollama >/dev/null 2>&1; then
+    echo -e "\n📥 Ensuring Ollama model 'deepseek-r1:14b' is present..."
+    if ollama list 2>/dev/null | grep -q "deepseek-r1:14b"; then
+        echo "✅ Model 'deepseek-r1:14b' already present"
+    else
+        echo "⬇️  Pulling 'deepseek-r1:14b'..."
+        ollama pull deepseek-r1:14b || echo "⚠️  Failed to pull model 'deepseek-r1:14b'"
+    fi
+fi
 echo -e "\n✅ Dotfiles + Java setup installed successfully!"
 echo "👉 Backups are in $BACKUP_DIR"
 echo "💡 Restart your terminal or run 'exec zsh' to apply changes"
