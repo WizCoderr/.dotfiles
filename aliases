@@ -3,6 +3,7 @@
 # -----------------------------
 alias update='sudo apt update'
 alias upgrade='sudo apt upgrade -y'
+alias arch-updat='sudo pacman -Syu'
 alias ll='ls -lah'
 alias clr='clear'
 alias h='history'
@@ -29,4 +30,5 @@ alias adb='$ANDROID_HOME/platform-tools/adb'
 #---------------------------------
 alias op='ollama pull'
 alias or='ollama run'
+alias cci='cursor-agent'
 
