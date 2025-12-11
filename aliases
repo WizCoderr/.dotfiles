@@ -3,12 +3,17 @@
 # -----------------------------
 alias update='sudo apt update'
 alias upgrade='sudo apt upgrade -y'
-alias arch-updat='sudo pacman -Syu'
 alias ll='ls -lah'
 alias clr='clear'
 alias h='history'
 alias ..='cd ..'
 alias ...='cd ../..'
+#-------------------------
+# Arch Shortcuts
+# ------------------------
+#alias yy-'yay -S'
+#alias aup='sudo pacman -Syu'
+#--------------------------------
 alias rm='rm -rf'
 alias gpu='watch -n 0.5 nvidia-smi'
 alias ex='exit'
