@@ -125,12 +125,12 @@ fi
 # Ensure Ollama model is pulled
 # -----------------------------
 if command -v ollama >/dev/null 2>&1; then
-    echo -e "\n📥 Ensuring Ollama model 'deepseek-r1:14b' is present..."
-    if ollama list 2>/dev/null | grep -q "deepseek-r1:14b"; then
-        echo "✅ Model 'deepseek-r1:14b' already present"
+    echo -e "\n📥 Ensuring Ollama model 'hf.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:IQ2_XXS ' is present..."
+    if ollama list 2>/dev/null | grep -q "hf.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:IQ2_XXS"; then
+        echo "✅ Model 'hf.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:IQ2_XXS' already present"
     else
         echo "⬇️  Pulling 'deepseek-r1:14b'..."
-        ollama pull deepseek-r1:14b || echo "⚠️  Failed to pull model 'deepseek-r1:14b'"
+        ollama pull hf.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:IQ2_XXS || echo "⚠️  Failed to pull hf.co/unsloth/Devstral-Small-2-24B-Instruct-2512-GGUF:IQ2_XXS'"
     fi
 fi
 echo -e "\n✅ Dotfiles + Java setup installed successfully!"
