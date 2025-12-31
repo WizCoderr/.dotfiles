@@ -8,6 +8,7 @@ alias clr='clear'
 alias h='history'
 alias ..='cd ..'
 alias ...='cd ../..'
+alias acp='antigravity-claude-proxy start'
 #-------------------------
 # Arch Shortcuts
 # ------------------------
