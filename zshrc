@@ -66,4 +66,10 @@ eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
+export PATH=$PATH:/usr/local/go/bin
 export PATH="$BUN_INSTALL/bin:$PATH"
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/wizcoderr/.lmstudio/bin"
+# End of LM Studio CLI section
+
