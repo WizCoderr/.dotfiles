@@ -8,11 +8,11 @@ services:
       - "8080:8080"
     environment:
       # --- Ollama ---
-      OLLAMA_API_BASE_URL: "http://192168.1.15:11434"
+      OLLAMA_API_BASE_URL: "http//host.docker.internal:11434"
 
       # --- OpenAI ---
       OPENAI_API_KEY: "lm-studio"
-      OPENAI_API_BASE_URL: "http://192.168.1.15:1234/v1"
+      OPENAI_API_BASE_URL: "http://host.docker.internal:1234/v1"
 
       # --- Optional ---
       ENABLE_AUTO_UPDATE: "true"
