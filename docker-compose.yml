@@ -1,11 +1,20 @@
 version: "3.8"
 
 services:
+
+  it_tools:
+    image: corentinth/it-tools:latest
+    container_name: it_tools
+    ports:
+      - 8080:80
+    restart: always
+    networks:
+      - wiz_network
   openwebui:
     image: ghcr.io/open-webui/open-webui:latest
     container_name: openwebui
     ports:
-      - "8080:8080"
+      - "9090:8080"
     environment:
       # --- Ollama ---
       OLLAMA_API_BASE_URL: "http//host.docker.internal:11434"
@@ -20,6 +29,11 @@ services:
     volumes:
       - openwebui_data:/app/backend/data
     restart: always
+    networks:
+      - wiz_network
 
 volumes:
   openwebui_data:
+networks:
+  wiz_network:
+    driver: bridge
