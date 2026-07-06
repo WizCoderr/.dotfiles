@@ -2,66 +2,151 @@
 
 set -euo pipefail
 
-# mac_zsh_install.sh
-# Installer for macOS: installs Homebrew (if missing), zsh, and Oh My Zsh,
-# adds brew zsh to /etc/shells when required and sets it as the default shell.
-
 GREEN='\033[0;32m'
-YELLOW='\033[0;33m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+RED='\033[0;31m'
 NC='\033[0m'
 
-echo -e "${GREEN}--- Starting Zsh installer for macOS ---${NC}"
+print_info() {
+  echo -e "${BLUE}==>${NC} $1"
+}
 
-if [[ "$(uname)" != "Darwin" ]]; then
-  echo -e "${YELLOW}This script is intended for macOS (Darwin). Exiting.${NC}"
-  exit 1
-fi
+print_success() {
+  echo -e "${GREEN}✓${NC} $1"
+}
 
-# Ensure curl and git are present (macOS usually has them)
-if ! command -v curl >/dev/null 2>&1; then
-  echo "curl is required but not found. Please install curl and re-run."
-  exit 1
-fi
+print_warning() {
+  echo -e "${YELLOW}⚠${NC} $1"
+}
 
-# Install Homebrew if missing
-if ! command -v brew >/dev/null 2>&1; then
-  echo "Homebrew not found — installing Homebrew..."
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-  # Add Homebrew to PATH for this session (handles Intel/Apple Silicon)
-  if [[ -f /opt/homebrew/bin/brew ]]; then
-    eval "$(/opt/homebrew/bin/brew shellenv)"
-  elif [[ -f /usr/local/bin/brew ]]; then
-    eval "$(/usr/local/bin/brew shellenv)"
+print_error() {
+  echo -e "${RED}✗${NC} $1"
+}
+
+check_system() {
+  if [[ "$(uname -s)" != "Darwin" ]]; then
+    print_error "This script is intended for macOS."
+    exit 1
   fi
-else
-  echo "Homebrew found at: $(command -v brew)"
-fi
 
-echo "Updating Homebrew..."
-brew update || true
+  print_success "macOS detected"
+}
 
-echo "Installing zsh, git, and curl via Homebrew (if not present)..."
-brew install zsh git curl || true
+install_homebrew() {
+  if [[ -x /opt/homebrew/bin/brew ]]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+  elif [[ -x /usr/local/bin/brew ]]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+  elif command -v brew >/dev/null 2>&1; then
+    eval "$(brew shellenv)"
+  else
+    print_info "Installing Homebrew..."
+    /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 
-# Determine zsh path to use
-ZSH_PATH="$(command -v zsh)"
-echo "Using zsh: ${ZSH_PATH}"
+    if [[ -x /opt/homebrew/bin/brew ]]; then
+      eval "$(/opt/homebrew/bin/brew shellenv)"
+    elif [[ -x /usr/local/bin/brew ]]; then
+      eval "$(/usr/local/bin/brew shellenv)"
+    fi
+  fi
 
-# Ensure the zsh path is listed in /etc/shells
-if ! grep -Fxq "${ZSH_PATH}" /etc/shells; then
-  echo "Adding ${ZSH_PATH} to /etc/shells (requires sudo)..."
-  sudo sh -c "echo ${ZSH_PATH} >> /etc/shells"
-fi
+  print_success "Homebrew available at $(command -v brew)"
+}
 
-echo "Installing Oh My Zsh (non-interactive)..."
-RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+install_packages() {
+  print_info "Updating Homebrew..."
+  brew update
 
-echo "Setting zsh as the default shell for the current user..."
-chsh -s "${ZSH_PATH}" || echo "chsh failed; you may need to run it manually: chsh -s ${ZSH_PATH}"
+  print_info "Installing Zsh packages..."
+  for package in zsh git curl fastfetch; do
+    if brew list --formula "$package" >/dev/null 2>&1; then
+      print_success "$package already installed"
+    else
+      brew install "$package"
+    fi
+  done
+}
 
-echo -e "${GREEN}--- Installation finished.${NC}"
-echo "Next steps (optional):"
-echo " - Open a new Terminal window to start using zsh."
-echo " - If you maintain dotfiles here, consider symlinking your .zshrc and other files from this repo."
+configure_default_shell() {
+  local zsh_path
+  zsh_path="$(command -v zsh)"
 
-exit 0
+  if ! grep -Fxq "$zsh_path" /etc/shells; then
+    print_info "Adding $zsh_path to /etc/shells..."
+    echo "$zsh_path" | sudo tee -a /etc/shells >/dev/null
+  fi
+
+  if [[ "${SHELL:-}" == "$zsh_path" ]]; then
+    print_success "Zsh is already the default shell"
+  else
+    print_info "Changing default shell to $zsh_path..."
+    chsh -s "$zsh_path" || print_warning "chsh failed; run manually: chsh -s $zsh_path"
+  fi
+}
+
+install_oh_my_zsh() {
+  if [[ -d "$HOME/.oh-my-zsh" ]]; then
+    print_success "Oh My Zsh already installed"
+    return
+  fi
+
+  print_info "Installing Oh My Zsh..."
+  RUNZSH=no CHSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+}
+
+install_powerlevel10k() {
+  local theme_dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k"
+
+  if [[ -d "$theme_dir" ]]; then
+    print_success "Powerlevel10k already installed"
+  else
+    print_info "Installing Powerlevel10k..."
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git "$theme_dir"
+  fi
+}
+
+install_plugins() {
+  local custom_dir="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins"
+  local plugins=(
+    "zsh-autosuggestions|https://github.com/zsh-users/zsh-autosuggestions"
+    "zsh-syntax-highlighting|https://github.com/zsh-users/zsh-syntax-highlighting"
+    "zsh-completions|https://github.com/zsh-users/zsh-completions"
+    "zsh-history-substring-search|https://github.com/zsh-users/zsh-history-substring-search"
+  )
+
+  mkdir -p "$custom_dir"
+  print_info "Installing Zsh plugins..."
+
+  for plugin in "${plugins[@]}"; do
+    local name="${plugin%%|*}"
+    local url="${plugin##*|}"
+    local plugin_dir="$custom_dir/$name"
+
+    if [[ -d "$plugin_dir" ]]; then
+      print_success "$name already installed"
+    else
+      git clone "$url" "$plugin_dir"
+    fi
+  done
+}
+
+main() {
+  echo ""
+  echo "macOS Zsh Installer"
+  echo ""
+
+  check_system
+  install_homebrew
+  install_packages
+  install_oh_my_zsh
+  install_powerlevel10k
+  install_plugins
+  configure_default_shell
+
+  echo ""
+  print_success "Zsh setup complete"
+  print_warning "Open a new terminal or run exec zsh to apply changes."
+}
+
+main "$@"

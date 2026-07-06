@@ -1,73 +1,109 @@
 # Enable Powerlevel10k instant prompt. Should stay close to the top of ~/.zshrc.
-# Initialization code that may require console input (password prompts, [y/n]
-# confirmations, etc.) must go above this block; everything else may go below.
 if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
   source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
 fi
-clear
-fastfetch
+
+path_prepend() {
+  [[ -d "$1" ]] || return
+  case ":$PATH:" in
+    *":$1:"*) ;;
+    *) export PATH="$1:$PATH" ;;
+  esac
+}
 
 # -----------------------------
-# Zsh Configuration (Portable)
+# Homebrew
 # -----------------------------
-
-# Only source Oh-My-Zsh if it exists
-if [ -d "$HOME/.oh-my-zsh" ]; then
-    export ZSH="$HOME/.oh-my-zsh"
-    ZSH_THEME="powerlevel10k/powerlevel10k"
-
-    # Plugins
-    plugins=(
-        git
-        zsh-autosuggestions
-        zsh-syntax-highlighting
-        zsh-completions
-        zsh-history-substring-search
-    )
-
-    # Source Oh-My-Zsh
-    if [ -f "$ZSH/oh-my-zsh.sh" ]; then
-        source "$ZSH/oh-my-zsh.sh"
-    fi
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+elif [[ -x "$HOME/.linuxbrew/bin/brew" ]]; then
+  eval "$("$HOME/.linuxbrew/bin/brew" shellenv)"
 fi
 
 # -----------------------------
-# ASDF (optional)
+# Java
 # -----------------------------
-if [ -f "$HOME/.asdf/asdf.sh" ]; then
-    source "$HOME/.asdf/asdf.sh"
-    source "$HOME/.asdf/completions/asdf.bash"
+if [[ -z "${JAVA_HOME:-}" ]]; then
+  if [[ "$(uname -s)" == "Darwin" ]] && /usr/libexec/java_home -v 17 >/dev/null 2>&1; then
+    export JAVA_HOME="$(/usr/libexec/java_home -v 17)"
+  elif command -v brew >/dev/null 2>&1 && [[ -d "$(brew --prefix openjdk@17 2>/dev/null)" ]]; then
+    export JAVA_HOME="$(brew --prefix openjdk@17)"
+  elif [[ -d /usr/lib/jvm ]]; then
+    for java_dir in /usr/lib/jvm/java-17-openjdk* /usr/lib/jvm/*-17-*; do
+      if [[ -d "$java_dir" ]]; then
+        export JAVA_HOME="$java_dir"
+        break
+      fi
+    done
+  fi
+fi
+
+if [[ -n "${JAVA_HOME:-}" ]]; then
+  path_prepend "$JAVA_HOME/bin"
 fi
 
 # -----------------------------
-# Aliases
+# Zsh Configuration
 # -----------------------------
-[ -f "$HOME/.aliases" ] && source "$HOME/.aliases"
+if [[ -d "$HOME/.oh-my-zsh" ]]; then
+  export ZSH="$HOME/.oh-my-zsh"
+  ZSH_THEME="strug"
 
-# Editor
+  plugins=(
+    git
+    zsh-autosuggestions
+    zsh-syntax-highlighting
+    zsh-completions
+    zsh-history-substring-search
+    wikipidia
+  )
+
+  [[ -f "$ZSH/oh-my-zsh.sh" ]] && source "$ZSH/oh-my-zsh.sh"
+fi
+
+# -----------------------------
+# Optional tools
+# -----------------------------
+if [[ -f "$HOME/.asdf/asdf.sh" ]]; then
+  source "$HOME/.asdf/asdf.sh"
+  [[ -f "$HOME/.asdf/completions/asdf.bash" ]] && source "$HOME/.asdf/completions/asdf.bash"
+fi
+
+if [[ -s "$HOME/.bun/_bun" ]]; then
+  source "$HOME/.bun/_bun"
+fi
+
+export BUN_INSTALL="$HOME/.bun"
+path_prepend "$BUN_INSTALL/bin"
+path_prepend "/usr/local/go/bin"
+path_prepend "$HOME/develop/flutter/bin"
+
+if [[ -f "$HOME/.local/bin/env" ]]; then
+  source "$HOME/.local/bin/env"
+fi
+
+# -----------------------------
+# Aliases and defaults
+# -----------------------------
+[[ -f "$HOME/.aliases" ]] && source "$HOME/.aliases"
+
 export EDITOR="nvim"
-
-# History
 export HISTSIZE=10000
 export SAVEHIST=10000
 
-# To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64/
-export PATH=$JAVA_HOME/bin:$PATH
 
-# To customize prompt, run `p10k configure` or edit ~/.dotfiles/p10k.zsh.
-[[ ! -f ~/.dotfiles/p10k.zsh ]] || source ~/.dotfiles/p10k.zsh
+[[ -f "$HOME/.p10k.zsh" ]] && source "$HOME/.p10k.zsh"
 
-eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/Users/wizcoderr/.lmstudio/bin"
+# End of LM Studio CLI section
+
 
 # bun completions
-[ -s "/home/wizcoderr/.bun/_bun" ] && source "/home/wizcoderr/.bun/_bun"
+[ -s "/Users/wizcoderr/.bun/_bun" ] && source "/Users/wizcoderr/.bun/_bun"
 
 # bun
 export BUN_INSTALL="$HOME/.bun"
-export PATH=$PATH:/usr/local/go/bin
 export PATH="$BUN_INSTALL/bin:$PATH"
-
-. "$HOME/.local/bin/env"
-export PATH="$HOME/develop/flutter/bin:$PATH"

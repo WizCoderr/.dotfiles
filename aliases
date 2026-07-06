@@ -1,23 +1,51 @@
 # -----------------------------
 # General shortcuts
 # -----------------------------
-alias update='sudo apt update'
-alias upgrade='sudo apt upgrade -y'
 alias ll='ls -lah'
 alias clr='clear'
 alias h='history'
 alias ..='cd ..'
 alias ...='cd ../..'
-alias acp='antigravity-claude-proxy start'
-#-------------------------
-# Arch Shortcuts
-# ------------------------
-#alias yy-'yay -S'
-#alias aup='sudo pacman -Syu'
-#--------------------------------
-alias rm='rm -rf'
-alias gpu='watch -n 0.5 nvidia-smi'
 alias ex='exit'
+alias acp='antigravity-claude-proxy start'
+
+# -----------------------------
+# Package manager shortcuts
+# -----------------------------
+if command -v brew >/dev/null 2>&1; then
+  alias update='brew update'
+  alias upgrade='brew upgrade'
+  alias install='brew install'
+  alias search='brew search'
+elif command -v dnf >/dev/null 2>&1; then
+  alias update='sudo dnf check-update'
+  alias upgrade='sudo dnf upgrade -y'
+  alias install='sudo dnf install'
+  alias search='dnf search'
+elif command -v apt >/dev/null 2>&1; then
+  alias update='sudo apt update'
+  alias upgrade='sudo apt upgrade -y'
+  alias install='sudo apt install'
+  alias search='apt search'
+elif command -v pacman >/dev/null 2>&1; then
+  alias update='sudo pacman -Syu'
+  alias upgrade='sudo pacman -Syu'
+  alias install='sudo pacman -S'
+  alias search='pacman -Ss'
+fi
+
+if command -v yay >/dev/null 2>&1; then
+  alias yy='yay -S'
+  alias yyu='yay -Syu'
+fi
+
+# -----------------------------
+# Hardware/tool-specific shortcuts
+# -----------------------------
+if command -v nvidia-smi >/dev/null 2>&1; then
+  alias gpu='watch -n 0.5 nvidia-smi'
+fi
+
 # -----------------------------
 # Git shortcuts
 # -----------------------------
@@ -30,11 +58,13 @@ alias gpl='git pull'
 # -----------------------------
 # Android
 # -----------------------------
-alias adb='$ANDROID_HOME/platform-tools/adb'
-#----------------------------------
-# Ollama Shortcuts
-#---------------------------------
+if [[ -n "${ANDROID_HOME:-}" && -x "$ANDROID_HOME/platform-tools/adb" ]]; then
+  alias adb="$ANDROID_HOME/platform-tools/adb"
+fi
+
+# -----------------------------
+# Ollama shortcuts
+# -----------------------------
 alias op='ollama pull'
 alias or='ollama run'
 alias cci='cursor-agent'
-
